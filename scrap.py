@@ -26,14 +26,14 @@ for ssm in site_maps:
     ssite_map_tree_soup = BeautifulSoup(ssite_map_tree.content, features="xml").find('urlset').find_all('url')
     for link_block in ssite_map_tree_soup:
         link = link_block.find('loc').text
-        if link[19:25] == "krs-rp" or link[19:21] == "sc":
+        if link[19:25] == "krs-rp" or link[19:21] == "sc" or link[19:24] == "ceidg":
             pages_to_scrap.append(link_block.find('loc').text)
     sys.stdout.write("\r{0}>".format("="*round(current_prog/len(site_maps)*10)))
     sys.stdout.write("\033[94m GETTING ALL PAGES LINKS: \033[0m")
     sys.stdout.write(str(round(current_prog/len(site_maps)*100))+"%")
     sys.stdout.flush()
     # sleep to prevent getting blocked!
-    time.sleep(0.5)
+    time.sleep(0.1)
     current_prog+=1
 
 # SAVING BACKUP
@@ -44,7 +44,26 @@ for ssm in site_maps:
 
 
 # LOOPING THROUGH EACH LINK AND RETREIVING DATA
-for link in pages_to_scrap:
-    r = requests.get(link, proxies=proxies)
-    soup = BeautifulSoup(r.content, "html.parser")
+filename = "results.csv"
+current_prog = 0
+with open(filename, 'w', newline='') as f:
+    w = csv.DictWriter(f, ['company_name', 'company_nip', 'company_regon', 'company_link'])
+    w.writeheader()
+    for page in pages_to_scrap:
+        info = {}
+        r = requests.get(page, proxies=proxies)
+        soup = BeautifulSoup(r.content, "html.parser").body.find('div', attrs={"id":"fullWidthMainContentWrapper"}).find("div").find("div").find("div", attrs={"class":"fullWidthContentCenterContainer"}).find("div").find("div").find("div", attrs={"class":"editData"}).find("div", attrs={"class":"winfieldContainer level1 editHead"}).find("div").find("div", attrs={"class":"winFieldGroupContainer level1"}).find("div").find("div").find("div", attrs={"class":"winFieldGroupContainer level2"}).find("div", attrs={"class":"winfieldContainer level3 editHeadMoreWrap"}).find("div").find("div", attrs={"class":"winFieldGroupContainer level3"}).find("div").find("div").find("div", attrs={"class":"winFieldGroupContainer level4"})
+        info['company_name'] = soup.find_all("div")[0].h1.text
+        info['company_nip'] = soup.find_all("div")[2].find("div", attrs={"class":"winFieldTextData"}).text
+        info['company_regon'] = soup.find_all("div")[6].find("div", attrs={"class":"winFieldTextData"}).text
+        info['company_link'] = page
+        w.writerow(info)
+        sys.stdout.write("\r{0}>".format("="*round(current_prog/len(pages_to_scrap)*10)))
+        sys.stdout.write("\033[92m RETREIVING DATA FROM PAGES LINKS: \033[0m")
+        sys.stdout.write(str(round(current_prog/len(pages_to_scrap)*100))+"%")
+        sys.stdout.flush()
+        # sleep to prevent getting blocked!
+        time.sleep(0.1)
+        current_prog+=1
+
 print("done")
