@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 import sys
 import time
+import utils
 
 proxies = {
         'http': '173.208.239.10:15007'
@@ -35,6 +36,8 @@ for ssm in site_maps:
     # sleep to prevent getting blocked!
     time.sleep(0.1)
     current_prog+=1
+    #if current_prog == 3:
+    #    break
 
 # SAVING BACKUP
 #f = open("backup.txt", "w")
@@ -50,14 +53,11 @@ with open(filename, 'w', newline='') as f:
     w = csv.DictWriter(f, ['company_name', 'company_nip', 'company_regon', 'company_link'])
     w.writeheader()
     for page in pages_to_scrap:
-        info = {}
-        r = requests.get(page, proxies=proxies)
-        soup = BeautifulSoup(r.content, "html.parser").body.find('div', attrs={"id":"fullWidthMainContentWrapper"}).find("div").find("div").find("div", attrs={"class":"fullWidthContentCenterContainer"}).find("div").find("div").find("div", attrs={"class":"editData"}).find("div", attrs={"class":"winfieldContainer level1 editHead"}).find("div").find("div", attrs={"class":"winFieldGroupContainer level1"}).find("div").find("div").find("div", attrs={"class":"winFieldGroupContainer level2"}).find("div", attrs={"class":"winfieldContainer level3 editHeadMoreWrap"}).find("div").find("div", attrs={"class":"winFieldGroupContainer level3"}).find("div").find("div").find("div", attrs={"class":"winFieldGroupContainer level4"})
-        info['company_name'] = soup.find_all("div")[0].h1.text
-        info['company_nip'] = soup.find_all("div")[2].find("div", attrs={"class":"winFieldTextData"}).text
-        info['company_regon'] = soup.find_all("div")[6].find("div", attrs={"class":"winFieldTextData"}).text
+        info = utils.getData(page)
         info['company_link'] = page
         w.writerow(info)
+        if current_prog == 0:
+            print("\n")
         sys.stdout.write("\r{0}>".format("="*round(current_prog/len(pages_to_scrap)*10)))
         sys.stdout.write("\033[92m RETREIVING DATA FROM PAGES LINKS: \033[0m")
         sys.stdout.write(str(round(current_prog/len(pages_to_scrap)*100))+"%")
