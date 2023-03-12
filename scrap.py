@@ -6,7 +6,7 @@ import time
 import utils
 
 proxies = {
-        'http': '173.208.239.10:15007'
+        'http': '69.30.197.122:15007'
         }
 
 site_maps = []
@@ -34,7 +34,7 @@ for ssm in site_maps:
     sys.stdout.write(str(round(current_prog/len(site_maps)*100))+"%")
     sys.stdout.flush()
     # sleep to prevent getting blocked!
-    time.sleep(0.1)
+    time.sleep(1)
     current_prog+=1
     #if current_prog == 3:
     #    break

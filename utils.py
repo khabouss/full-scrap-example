@@ -1,11 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
+import time
 
 proxies = {
-        'http': '173.208.239.10:15007'
+        'http': '69.30.197.122:15007'
         }
 
 def getData(page):
+    time.sleep(1)    
     data = {}
     r = requests.get(page, proxies=proxies)
     soup = BeautifulSoup(r.content, "html.parser")
