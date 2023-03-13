@@ -38,8 +38,10 @@ for ssm in site_maps:
         ssite_map_tree = requests.get(ssm, proxies={"http":proxies[next]}, headers=headers)
     except:
         next = (next + 1) % len(proxies)
-        print("\nChanging Proxy")
+        print("\nChanging Proxy\n")
         ssite_map_tree = requests.get(ssm, proxies={"http":proxies[next]}, headers=headers)
+        time.sleep(5)
+        print("Sleeping zz...")
         continue
 
     ssite_map_tree_soup = BeautifulSoup(ssite_map_tree.content, features="xml").find('urlset').find_all('url')
@@ -63,10 +65,10 @@ for ssm in site_maps:
     sys.stdout.flush()
 
     # sleep to prevent getting blocked!
-    time.sleep(1)
+    time.sleep(0.1)
     current_prog+=1
-    if current_prog == 3:
-       break
+#    if current_prog == 3:
+#       break
 
 # SAVING BACKUP
 #f = open("backup.txt", "w")
@@ -81,7 +83,13 @@ with open(filename, 'w', newline='') as f:
     w = csv.DictWriter(f, ['company_name', 'company_nip', 'company_regon', 'company_link'])
     w.writeheader()
     for page in pages_to_scrap:
-        info = utils.getData(page)
+        info = None
+        try:
+            info = utils.getData(page)
+        except:
+            print("Exception at: "+page+"\nSleeping 10")
+            time.sleep(10)
+            continue
         if info['company_name'] == '-' or info['company_nip'] == '-' or info['company_regon'] == '-' or info['company_link'] == '-':
             continue
         w.writerow(info)
@@ -94,5 +102,7 @@ with open(filename, 'w', newline='') as f:
         # sleep to prevent getting blocked!
         time.sleep(0.1)
         current_prog+=1
+#        if current_prog == 60:
+#            break
 
 print("\033[90m ALL GOOD !! \033[0m")
